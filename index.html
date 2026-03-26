@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joyce's 魔法任務單字卡 ✨</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti for fireworks -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Nunito', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(-45deg, #ffc8dd, #ffafcc, #bde0fe, #a2d2ff);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow-x: hidden;
+            color: #4a4a4a;
+        }
+        
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* Macaron Color Palette */
+        .macaron-1 { background: linear-gradient(135deg, #FFD1DC 0%, #ffb3c6 100%); color: #5a4a4e; }
+        .macaron-2 { background: linear-gradient(135deg, #AEC6CF 0%, #8db4e2 100%); color: #3b4549; }
+        .macaron-3 { background: linear-gradient(135deg, #77DD77 0%, #5cd65c 100%); color: #2d552d; }
+        .macaron-4 { background: linear-gradient(135deg, #FDFD96 0%, #fcfc71 100%); color: #6b6b3f; }
+        .macaron-5 { background: linear-gradient(135deg, #C3B1E1 0%, #b095d9 100%); color: #4a4356; }
+        .macaron-6 { background: linear-gradient(135deg, #FFB7B2 0%, #ff9e99 100%); color: #664947; }
+        
+        .card-pattern { position: absolute; inset: 0; border-radius: 1.5rem; background-image: radial-gradient(rgba(255,255,255,0.4) 2px, transparent 2px); background-size: 20px 20px; opacity: 0.6; pointer-events: none; }
+
+        /* 3D Flip Card */
+        .flip-card { perspective: 1000px; width: 100%; height: 360px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-radius: 1.5rem; }
+        .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 1.5rem; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; border: 4px solid rgba(255, 255, 255, 0.5); }
+        .flip-card-back { transform: rotateY(180deg); }
+
+        /* Animations */
+        .cute-bounce { animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 50% { transform: translateX(8px); } 75% { transform: translateX(-8px); } }
+        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        @keyframes popIn { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+        
+        /* Combo Flame Animation */
+        .flame-up { animation: flameUp 0.5s ease-out forwards; }
+        @keyframes flameUp { 0% { transform: scale(0.5) translateY(10px); opacity: 0; } 50% { transform: scale(1.2) translateY(-5px); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
+        .stitched-border { position: absolute; inset: 10px; border: 2px dashed rgba(255, 255, 255, 0.6); border-radius: 1.2rem; pointer-events: none; z-index: 1; }
+
+        /* Jelly Button */
+        .jelly-btn { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; }
+        .jelly-btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 6px 10px rgba(0,0,0,0.1); }
+        .jelly-btn:active { transform: translateY(0) scale(0.95); }
+
+        /* Compact Tabs */
+        .tab-active { background: #ec4899 !important; color: white !important; border-color: white !important; }
+        .tab-inactive { background: rgba(255,255,255,0.6) !important; color: #ec4899 !important; border-color: rgba(255,255,255,0.4) !important; }
+        .tab-mistake-active { background: #ef4444 !important; color: white !important; border-color: #fca5a5 !important; }
+
+        /* View Container Transition */
+        .view-section { display: none; animation: fadeIn 0.4s ease forwards; }
+        .view-section.active { display: flex; flex-direction: column; width: 100%; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Input field style */
+        .cute-input { width: 100%; padding: 0.8rem 1.2rem; border-radius: 1rem; border: 3px solid rgba(255,255,255,0.8); background: rgba(255,255,255,0.9); font-size: 1.1rem; font-weight: bold; color: #4a4a4a; text-align: center; outline: none; transition: all 0.3s; box-shadow: inset 0 4px 6px rgba(0,0,0,0.05); }
+        .cute-input:focus { border-color: #f472b6; background: #fff; box-shadow: 0 0 15px rgba(244, 114, 182, 0.4); }
+        
+        /* Dropdown style */
+        .cute-select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ec4899' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1em; }
+        .cute-select-no-arrow { appearance: none; text-align: center; }
+
+        /* Matching Grid Cards */
+        .match-card { background: rgba(255,255,255,0.9); border: 2px solid white; border-radius: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: 800; font-size: 0.9rem; padding: 0.4rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); user-select: none; min-height: 4rem; word-break: break-word; line-height: 1.1; }
+        .match-card.selected { background: #fdf2f8; border-color: #f472b6; transform: scale(1.05); box-shadow: 0 0 15px rgba(244,114,182,0.5); color: #db2777; }
+        .match-card.matched { visibility: hidden; opacity: 0; transition: visibility 0s 0.3s, opacity 0.3s; }
+
+        /* 2P Mode Highlight */
+        .p-active { transform: scale(1.05); border-color: white !important; box-shadow: 0 8px 12px rgba(0,0,0,0.15); z-index: 20; }
+        .p-inactive { opacity: 0.6; transform: scale(0.95); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-2 pt-4">
+
+    <!-- Floating Background Decor -->
+    <div class="fixed top-10 left-4 text-white/40 text-5xl animate-pulse -z-10"><i class="fa-solid fa-star"></i></div>
+    <div class="fixed bottom-20 right-4 text-white/40 text-6xl animate-bounce -z-10" style="animation-duration: 4s;"><i class="fa-solid fa-cloud"></i></div>
+
+    <!-- Global Overlays -->
+    <div id="global-timeup-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-6 text-center" style="display: none;">
+        <div class="bg-white rounded-3xl p-6 border-4 border-pink-400 shadow-2xl max-w-sm w-full pop-in">
+            <i class="fa-solid fa-bell text-5xl text-pink-500 mb-3 animate-bounce"></i>
+            <h2 class="text-2xl font-black text-gray-800 mb-1">時間到！</h2>
+            <p class="text-gray-600 font-bold mb-4">任務設定的時間已結束！</p>
+            <button onclick="document.getElementById('global-timeup-overlay').style.display='none';" class="jelly-btn bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black py-2 px-8 rounded-full shadow-lg border-2 border-white w-full text-lg">確定</button>
+        </div>
+    </div>
+
+    <div id="global-2p-winner-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex flex-col items-center justify-center p-6 text-center" style="display: none;">
+        <div class="bg-white rounded-3xl p-6 border-4 border-pink-400 shadow-2xl max-w-sm w-full pop-in">
+            <i class="fa-solid fa-crown text-5xl text-yellow-400 mb-3 animate-bounce"></i>
+            <h2 class="text-2xl font-black text-gray-800 mb-1">牌組完成！</h2>
+            <div class="text-4xl font-black text-pink-500 mb-2 drop-shadow-md" id="2p-winner-text">🏆 P1 獲勝！</div>
+            <p class="text-gray-600 font-bold mb-4 text-lg">最終答對題數 <br><span class="text-2xl text-gray-800" id="2p-final-score">10 : 8</span></p>
+            <button onclick="close2PWinnerAndRestart()" class="jelly-btn bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-black py-2 px-8 rounded-full shadow-lg border-2 border-white w-full text-lg">再來一局</button>
+        </div>
+    </div>
+
+    <!-- 🎯 COMPACT DASHBOARD -->
+    <div class="w-full max-w-md bg-white/40 backdrop-blur-md p-3 rounded-2xl shadow-sm border border-white/50 relative z-10 mb-3">
+        
+        <!-- Row 1: Title, Combo & Gear -->
+        <div class="flex justify-between items-center mb-2">
+            <h1 class="text-lg font-extrabold text-gray-700 flex items-center gap-1">
+                <i class="fa-solid fa-wand-magic-sparkles text-pink-400"></i> Joyce's 魔法任務
+            </h1>
+            <div class="flex items-center gap-1.5">
+                <!-- 🔥 Combo Badge -->
+                <div id="combo-badge" class="hidden text-xs font-black text-orange-500 bg-white/90 px-1.5 py-0.5 rounded-full border border-orange-300 shadow-sm">
+                    🔥 x<span id="combo-count">3</span>
+                </div>
+                <!-- 迷你計時顯示器 -->
+                <div id="global-timer-display-top" class="hidden text-xs font-black text-blue-500 bg-white/90 px-1.5 py-0.5 rounded border border-blue-200 transition-colors">
+                    <i class="fa-regular fa-clock"></i> <span id="global-time-sec-top">00:00</span>
+                </div>
+                <button onclick="toggleSettingsPanel()" class="jelly-btn text-gray-500 bg-white/80 w-6 h-6 rounded-full shadow-sm flex items-center justify-center border border-white hover:text-pink-500">
+                    <i class="fa-solid fa-gear text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ⚙️ Hidden Settings Panel -->
+        <div id="settings-panel" class="hidden flex-col gap-1.5 mb-2 p-1.5 bg-white/60 rounded-xl border border-white shadow-inner">
+            <!-- Timer Setting -->
+            <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-hourglass-half text-blue-400 text-xs pl-1"></i>
+                <select id="timer-select" onchange="resetGlobalTimer()" class="cute-select-no-arrow jelly-btn flex-1 bg-white/90 text-gray-700 border border-white py-0.5 px-1 rounded flex-1 text-xs font-bold shadow-sm outline-none">
+                    <option value="0">計時: 關閉</option>
+                    <option value="30">30 秒</option>
+                    <option value="60">1 分鐘</option>
+                    <option value="180">3 分鐘</option>
+                    <option value="300">5 分鐘</option>
+                    <option value="600">10 分鐘</option>
+                </select>
+                <div class="flex gap-0.5">
+                    <button onclick="startGlobalTimer()" class="jelly-btn w-6 h-6 rounded bg-green-400 text-white flex items-center justify-center"><i class="fa-solid fa-play text-[10px] ml-0.5"></i></button>
+                    <button onclick="pauseGlobalTimer()" class="jelly-btn w-6 h-6 rounded bg-yellow-400 text-white flex items-center justify-center"><i class="fa-solid fa-pause text-[10px]"></i></button>
+                    <button onclick="stopGlobalTimer()" class="jelly-btn w-6 h-6 rounded bg-red-400 text-white flex items-center justify-center"><i class="fa-solid fa-stop text-[10px]"></i></button>
+                </div>
+            </div>
+            <!-- Speech Speed & 2P Settings -->
+            <div class="flex gap-1.5">
+                <button id="btn-toggle-speed" onclick="toggleSpeechRate()" class="jelly-btn flex-1 bg-white/80 text-gray-600 border border-white py-1 rounded text-xs font-bold shadow-sm flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-rabbit text-pink-400" id="speed-icon"></i> 語速: 正常
+                </button>
+                <button id="btn-toggle-2p" onclick="toggle2PMode()" class="jelly-btn flex-1 bg-white/80 text-gray-600 border border-white py-1 rounded text-xs font-bold shadow-sm flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-user-group"></i> 雙人對戰: 關
+                </button>
+            </div>
+        </div>
+
+        <!-- Row 2: Lesson + Decks -->
+        <div class="flex gap-1.5 mb-2 h-7">
+            <select id="lessonFilter" onchange="changeLesson()" class="cute-select-no-arrow w-[30%] bg-white/90 border border-white rounded-lg px-1 text-xs font-bold text-gray-700 shadow-sm outline-none text-center jelly-btn">
+                <option value="all">全課次</option>
+                <option value="1">L1</option>
+                <option value="2">L2</option>
+                <option value="3">L3</option>
+                <option value="R1">R1</option>
+            </select>
+            <div class="flex flex-1 gap-1">
+                <button id="btn-vocab" onclick="switchDeck('vocab')" class="jelly-btn flex-1 rounded-lg text-xs font-bold border-2 transition-all tab-active">單字</button>
+                <button id="btn-idiom" onclick="switchDeck('idiom')" class="jelly-btn flex-1 rounded-lg text-xs font-bold border-2 transition-all tab-inactive">片語</button>
+                <button id="btn-mistakes" onclick="switchDeck('mistakes')" class="jelly-btn flex-1 rounded-lg text-[10px] font-bold border-2 transition-all tab-inactive flex items-center justify-center gap-0.5 relative">
+                    錯題<span id="mistakes-count" class="bg-red-500 text-white rounded-full px-1 py-0.5 text-[8px] leading-none ml-0.5 transition-transform duration-300">0</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Row 3: Mode Select + Download -->
+        <div class="flex gap-1.5 h-9">
+            <select id="modeFilter" onchange="changeModeFromSelect()" class="cute-select-no-arrow flex-1 bg-pink-50 border-2 border-pink-400 rounded-lg px-2 text-sm font-black text-pink-600 shadow-sm outline-none text-center jelly-btn">
+                <option value="welcome" selected disabled>✨ 選擇魔法任務...</option>
+                <option value="flashcard">🎴 任務一：閃卡記憶</option>
+                <option value="mc-zh-en">🇹🇼 任務二：看中選英</option>
+                <option value="mc-en-zh">🇺🇸 任務三：看英選中</option>
+                <option value="typing">✍️ 任務四：例句填空</option>
+                <option value="dictation">🎧 任務五：聽音拼字</option>
+                <option value="scramble">🧩 任務六：字母重組</option>
+                <option value="matching">🔗 任務七：記憶連連看</option>
+                <option value="timeattack">⏱️ 任務八：限時生存</option>
+                <option value="exact">📝 任務九：精準填空</option>
+            </select>
+            <button onclick="downloadMistakes()" class="jelly-btn w-9 rounded-lg text-sm font-bold border-2 border-gray-200 bg-white text-gray-600 shadow-sm flex items-center justify-center" title="下載錯題CSV">
+                <i class="fa-solid fa-download"></i>
+            </button>
+        </div>
+
+        <!-- 📊 進度條 -->
+        <div id="progress-container" class="w-full bg-white/40 h-1.5 rounded-full mt-2 overflow-hidden shadow-inner hidden">
+            <div id="progress-bar-fill" class="bg-gradient-to-r from-pink-300 to-pink-500 h-full w-0 transition-all duration-500"></div>
+        </div>
+
+        <!-- 👥 2P Score Board (Compact) -->
+        <div id="scoreboard-2p" class="hidden flex justify-between gap-2 mt-2 transition-all duration-300">
+            <div id="p1-panel" class="flex-1 bg-pink-400 text-white font-black py-0.5 rounded-lg text-center border border-pink-300 p-active shadow-sm text-sm">
+                P1 <span id="p1-score">0</span>
+            </div>
+            <div id="p2-panel" class="flex-1 bg-blue-400 text-white font-black py-0.5 rounded-lg text-center border border-blue-300 p-inactive shadow-sm text-sm opacity-50">
+                P2 <span id="p2-score">0</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="w-full max-w-md relative z-10 flex-1 flex flex-col items-center">
+        
+        <!-- 角落白熊裝飾 (固定在右下角防擋) -->
+        <div id="bear-deco" class="fixed bottom-0 right-2 sm:right-6 z-50 pointer-events-none animate-bounce transition-opacity" style="animation-duration: 4s;">
+            <svg class="w-16 h-[55px] drop-shadow-md" viewBox="0 0 100 85" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 18 85 C 18 10, 82 10, 82 85 Z" fill="#FFFFFF"/>
+                <circle cx="28" cy="28" r="8" fill="#FFFFFF"/> <circle cx="72" cy="28" r="8" fill="#FFFFFF"/>
+                <circle cx="28" cy="28" r="3.5" fill="#FFD1DC"/> <circle cx="72" cy="28" r="3.5" fill="#FFD1DC"/>
+                <circle cx="36" cy="48" r="3" fill="#4A4A4E"/> <circle cx="64" cy="48" r="3" fill="#4A4A4E"/>
+                <circle cx="50" cy="51" r="2.5" fill="#4A4A4E"/>
+                <path d="M 46 54 Q 50 57 54 54" fill="none" stroke="#4A4A4E" stroke-width="2.5" stroke-linecap="round"/>
+                <ellipse cx="25" cy="53" rx="5" ry="3.5" fill="#FF9AA2" opacity="0.6"/> <ellipse cx="75" cy="53" rx="5" ry="3.5" fill="#FF9AA2" opacity="0.6"/>
+            </svg>
+        </div>
+
+        <!-- ================= VIEW 0: WELCOME SCREEN ================= -->
+        <div id="view-welcome" class="view-section active w-full flex flex-col items-center justify-center pt-8">
+            <div class="animate-bounce" style="animation-duration: 3s;">
+                <i class="fa-solid fa-wand-magic-sparkles text-6xl text-pink-400 drop-shadow-lg"></i>
+            </div>
+            <h2 class="text-xl font-black text-gray-700 mt-4 drop-shadow-sm">歡迎來到魔法卡牌！</h2>
+            <p class="text-gray-500 font-bold mt-2 text-sm bg-white/60 px-4 py-1.5 rounded-full shadow-sm border border-white">
+                👆 請從上方選單選擇任務 ✨
+            </p>
+        </div>
+
+        <!-- ================= VIEW 1: FLASHCARD ================= -->
+        <div id="view-flashcard" class="view-section">
+            <div class="flip-card relative z-10" id="flashcard" onclick="toggleCard()">
+                <div class="flip-card-inner" id="cardInner">
+                    <div class="flip-card-front shadow-xl" id="cardFront">
+                        <div class="card-pattern"></div><div class="stitched-border"></div>
+                        <div class="absolute top-4 left-4 text-2xl opacity-60 text-white drop-shadow-sm"><i class="fa-solid fa-book"></i></div>
+                        <div class="bg-white/60 backdrop-blur-md border border-white/60 px-4 py-1 rounded-full text-xs font-extrabold mb-4 shadow-sm z-10" id="fc-pos">n.</div>
+                        <p class="text-xl font-extrabold leading-snug px-3 z-10 drop-shadow-sm" id="fc-def">Definition here.</p>
+                        <p class="text-xs opacity-90 mt-6 font-bold z-10 bg-white/50 px-3 py-1 rounded-full backdrop-blur-md flex items-center gap-1 shadow-sm border border-white/50">Tap to flip <i class="fa-solid fa-hand-pointer animate-bounce text-pink-500"></i></p>
+                    </div>
+                    <div class="flip-card-back shadow-xl" id="cardBack">
+                        <div class="card-pattern"></div><div class="stitched-border"></div>
+                        <div class="flex flex-col items-center gap-1 mb-2 z-10 w-full px-2">
+                            <h2 class="text-2xl md:text-3xl font-black tracking-tight drop-shadow-md text-center leading-tight break-words w-full" id="fc-word">word</h2>
+                            <button onclick="event.stopPropagation(); speakWord()" class="jelly-btn bg-white/80 backdrop-blur-md rounded-full w-8 h-8 flex items-center justify-center shadow-md border-2 border-white shrink-0 text-gray-800"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                        </div>
+                        <div class="text-sm font-bold bg-white/60 backdrop-blur-md border border-white/60 px-3 py-0.5 rounded-full mb-3 shadow-sm flex items-center gap-2 z-10"><span id="fc-zh" class="text-gray-800">中文</span></div>
+                        <div class="w-full bg-white/60 backdrop-blur-md border border-white/80 rounded-2xl p-3 text-left relative shadow-inner z-10">
+                            <p class="text-sm font-bold leading-relaxed italic pr-6 text-gray-700" id="fc-ex">Example sentence.</p>
+                            <button onclick="event.stopPropagation(); speakSentence()" class="jelly-btn absolute bottom-2 right-2 bg-white/80 backdrop-blur-md text-pink-500 rounded-full w-7 h-7 flex items-center justify-center shadow-md border border-white text-[10px]"><i class="fa-solid fa-play ml-0.5"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full mt-4 flex justify-between gap-3">
+                <button onclick="nextItem(false)" class="jelly-btn flex-1 bg-white/70 backdrop-blur-md border-2 border-white font-extrabold py-2 rounded-xl shadow-md flex items-center justify-center gap-1 text-gray-600 text-sm"><i class="fa-solid fa-forward-step text-pink-400"></i> 跳過</button>
+                <div id="fc-2p-controls" class="hidden flex-2 w-1/2 flex gap-2">
+                    <button onclick="manualScore(1)" class="jelly-btn flex-1 bg-pink-400 text-white font-black py-2 rounded-xl shadow-md border-2 border-white text-sm">+P1</button>
+                    <button onclick="manualScore(2)" class="jelly-btn flex-1 bg-blue-400 text-white font-black py-2 rounded-xl shadow-md border-2 border-white text-sm">+P2</button>
+                </div>
+                <button id="fc-1p-btn" onclick="handleSuccess()" class="jelly-btn flex-1 bg-gradient-to-r from-yellow-300 to-orange-400 text-white font-black py-2 rounded-xl shadow-lg border-2 border-white/50 flex items-center justify-center gap-1 text-sm"><i class="fa-solid fa-star animate-pulse"></i> 記住了</button>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 2: MULTIPLE CHOICE ================= -->
+        <div id="view-mc" class="view-section w-full">
+            <div id="mc-q-card" class="w-full h-32 macaron-2 rounded-3xl relative shadow-lg flex flex-col items-center justify-center p-4 text-center border-4 border-white/50 mb-3 transition-colors duration-500">
+                <div class="card-pattern"></div><div class="stitched-border"></div>
+                <span id="mc-badge" class="absolute top-3 left-3 bg-white/50 px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm backdrop-blur-md z-10"></span>
+                <button onclick="speakWord()" id="mc-speak-btn" class="absolute top-3 right-3 bg-white/70 w-7 h-7 rounded-full shadow-sm backdrop-blur-md z-10 flex items-center justify-center jelly-btn text-gray-700"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                <h2 id="mc-question" class="text-xl md:text-2xl font-black drop-shadow-md z-10 break-words w-full">Question</h2>
+            </div>
+            <div id="mc-options" class="grid grid-cols-2 gap-2 w-full"></div>
+        </div>
+
+        <!-- ================= VIEW 3: TYPING / DICTATION / SCRAMBLE / EXACT ================= -->
+        <div id="view-typing" class="view-section w-full">
+            <div id="tp-q-card" class="w-full min-h-[120px] macaron-4 rounded-3xl relative shadow-lg flex flex-col items-center justify-center p-5 text-center border-4 border-white/50 mb-4 transition-colors duration-500">
+                <div class="card-pattern"></div><div class="stitched-border"></div>
+                
+                <div id="tp-header-typing" class="z-10 bg-white/60 px-3 py-0.5 rounded-full text-xs font-bold shadow-sm backdrop-blur-md mb-2 flex items-center gap-1 hidden"><span id="tp-zh" class="text-gray-800"></span><span id="tp-pos" class="text-gray-500 text-[10px]"></span></div>
+                <div id="tp-header-dictation" class="z-10 bg-white/60 px-3 py-0.5 rounded-full text-xs font-bold shadow-sm backdrop-blur-md absolute top-3 hidden">盲聽拼字 🎧</div>
+                <div id="tp-header-scramble" class="z-10 bg-white/60 px-3 py-0.5 rounded-full text-xs font-bold shadow-sm backdrop-blur-md absolute top-3 hidden"><span id="sc-zh" class="text-gray-800"></span></div>
+
+                <p id="tp-sentence" class="text-base font-bold leading-relaxed z-10 italic hidden">Sentence</p>
+                <button id="dc-play-btn" onclick="speakWord()" class="z-10 jelly-btn w-14 h-14 rounded-full bg-gradient-to-tr from-pink-400 to-rose-300 shadow-xl border-2 border-white flex items-center justify-center text-white text-xl animate-pulse hidden" style="animation-duration: 2s;"><i class="fa-solid fa-play ml-1"></i></button>
+                <h2 id="sc-scrambled" class="text-2xl md:text-3xl font-black tracking-[0.15em] drop-shadow-md z-10 text-gray-800 mt-4 break-words hidden"></h2>
+                <h2 id="es-hint-string" class="text-2xl md:text-3xl font-black drop-shadow-md z-10 text-gray-800 mt-4 break-words hidden" style="white-space: pre-wrap; font-family: monospace;"></h2>
+                
+                <button id="tp-speak-sent-btn" onclick="speakSentence()" class="mt-2 bg-white/70 px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md z-10 text-[10px] font-bold flex items-center gap-1 jelly-btn text-gray-700 hidden"><i class="fa-solid fa-volume-high"></i> 朗讀</button>
+                <button id="sc-speak-word-btn" onclick="speakWord()" class="mt-3 bg-white/70 px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md z-10 text-[10px] font-bold flex items-center gap-1 jelly-btn text-gray-700 hidden"><i class="fa-solid fa-volume-high"></i> 發音</button>
+            </div>
+
+            <div class="w-full flex flex-col gap-3">
+                <input type="text" id="tp-input" placeholder="輸入單字..." class="cute-input py-2 text-base" autocomplete="off" onkeypress="handleTypingEnter(event)">
+                <div class="flex gap-2">
+                    <button onclick="showHint()" class="jelly-btn flex-1 bg-white/70 border-2 border-white py-2 rounded-xl font-bold shadow-sm text-gray-600 text-xs"><i class="fa-solid fa-lightbulb text-yellow-500"></i> 提示</button>
+                    <button onclick="showAnswer()" class="jelly-btn flex-1 bg-white/70 border-2 border-white py-2 rounded-xl font-bold shadow-sm text-gray-600 text-xs"><i class="fa-solid fa-eye text-blue-400"></i> 解答</button>
+                    <button onclick="checkTypingAnswer()" class="jelly-btn flex-2 w-1/2 bg-gradient-to-r from-pink-400 to-rose-400 text-white border-2 border-white py-2 rounded-xl font-black shadow-md text-sm">確認 <i class="fa-solid fa-check"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 6: TIME ATTACK ================= -->
+        <div id="view-timeattack" class="view-section w-full relative">
+            <div class="flex justify-between w-full mb-2 px-1">
+                <div class="bg-red-400 text-white font-black px-3 py-1 rounded-lg shadow-sm border border-white flex items-center gap-1 text-sm">
+                    <i class="fa-solid fa-clock animate-pulse"></i> <span id="ta-time">60</span>s
+                </div>
+                <div class="bg-yellow-400 text-white font-black px-3 py-1 rounded-lg shadow-sm border border-white flex items-center gap-1 text-sm">
+                    <i class="fa-solid fa-star"></i> <span id="ta-score">0</span>
+                </div>
+            </div>
+            <div id="ta-q-card" class="w-full h-28 macaron-3 rounded-2xl relative shadow-md flex flex-col items-center justify-center p-3 text-center border-2 border-white/50 mb-3 transition-colors duration-200">
+                <div class="card-pattern"></div>
+                <h2 id="ta-question" class="text-xl md:text-2xl font-black drop-shadow-md z-10 break-words w-full">準備開始</h2>
+            </div>
+            <div id="ta-options" class="grid grid-cols-2 gap-2 w-full"></div>
+            
+            <div id="ta-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-50 rounded-2xl flex flex-col items-center justify-center p-4 text-center border-2 border-white shadow-lg" style="display: none;">
+                <h2 class="text-2xl font-black text-pink-500 mb-1">Time's Up!</h2>
+                <p class="text-gray-600 text-sm font-bold mb-2">獲得積分</p>
+                <div class="text-5xl font-black text-yellow-500 mb-4 drop-shadow-md" id="ta-final-score">0</div>
+                <button onclick="startTimeAttack()" class="jelly-btn bg-gradient-to-r from-pink-400 to-rose-400 text-white font-black py-2 px-6 rounded-full shadow-sm border border-white text-sm"><i class="fa-solid fa-rotate-right mr-1"></i>再玩一次</button>
+            </div>
+            <button id="ta-start-btn" onclick="startTimeAttack()" class="jelly-btn mt-6 bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-black py-3 px-6 rounded-full shadow-lg border-2 border-white text-lg w-full max-w-xs absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40"><i class="fa-solid fa-play mr-1"></i> 開始生存戰</button>
+        </div>
+
+        <!-- ================= VIEW 7: MATCHING BOARD ================= -->
+        <div id="view-matching" class="view-section w-full h-full flex flex-col relative">
+            <div class="flex justify-between items-center w-full mb-1 px-1">
+                <div class="text-xs font-bold text-gray-600 bg-white/60 px-2 py-1 rounded-lg shadow-sm"><i class="fa-solid fa-link text-pink-400"></i> 連連看</div>
+                <button onclick="setupMatchingBoard()" class="jelly-btn bg-white/80 text-gray-600 px-2 py-1 rounded-lg text-xs font-bold border border-white shadow-sm"><i class="fa-solid fa-rotate-right"></i> 重新洗牌</button>
+            </div>
+            <div id="match-grid" class="grid grid-cols-3 gap-1.5 w-full mt-1"></div>
+            <div id="match-overlay" class="absolute inset-0 bg-white/90 backdrop-blur-sm z-50 rounded-2xl flex flex-col items-center justify-center p-4 text-center border-2 border-white shadow-lg" style="display: none; top: 1.5rem;">
+                <h2 class="text-3xl font-black text-pink-500 mb-1">太棒了！</h2>
+                <p class="text-gray-600 text-sm font-bold mb-3">成功配對所有單字</p>
+                <div class="text-3xl font-black text-blue-500 mb-4 drop-shadow-md" id="match-p-winner" style="display:none;">P1 勝利</div>
+                <button onclick="setupMatchingBoard()" class="jelly-btn bg-gradient-to-r from-blue-400 to-cyan-400 text-white font-black py-2 px-6 rounded-full shadow-sm border border-white text-sm"><i class="fa-solid fa-play mr-1"></i>再挑戰一次</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- 1. Data Sets ---
+        const vocabList = [
+            { l: 1, w: "champion", p: "n. [C]", z: "冠軍", d: "Someone who wins a competition or game.", e: "She trained hard to become the tennis champion." },
+            { l: 1, w: "dedication", p: "n. [U]", z: "奉獻；投入", d: "Hard work and effort put into an activity.", e: "His dedication to teaching is truly inspiring." },
+            { l: 1, w: "dedicate", p: "vt.", z: "把⋯⋯奉獻於", d: "To give all your energy/time to something.", e: "He dedicated his life to helping the poor." },
+            { l: 1, w: "medal", p: "n. [C]", z: "獎牌", d: "A flat piece of metal given as an award.", e: "He proudly wore his gold medal." },
+            { l: 1, w: "injury", p: "n. [C, U]", z: "受傷", d: "Physical harm or damage to someone's body.", e: "She couldn't play because of a knee injury." },
+            { l: 1, w: "injure", p: "vt.", z: "使⋯⋯受傷", d: "To hurt or cause physical harm.", e: "He injured his back while lifting heavy boxes." },
+            { l: 1, w: "success", p: "n. [U]", z: "成功", d: "The achievement of an aim or purpose.", e: "Hard work is the key to success." },
+            { l: 1, w: "succeed", p: "vi.", z: "成功辦到", d: "To achieve something you have been trying to do.", e: "She finally succeeded in passing the test." },
+            { l: 1, w: "successful", p: "adj.", z: "成功的", d: "Achieving the results wanted or hoped for.", e: "They run a successful software company." },
+            { l: 1, w: "pain", p: "n. [C, U]", z: "疼痛", d: "A feeling of physical suffering.", e: "He felt a sharp pain in his stomach." },
+            { l: 1, w: "painful", p: "adj.", z: "疼痛的/令人痛苦的", d: "Causing physical or emotional pain.", e: "Saying goodbye to friends was a painful experience." },
+            { l: 1, w: "immediately", p: "adv.", z: "立即；馬上", d: "Without any delay.", e: "Please call me immediately when you arrive." },
+            { l: 1, w: "collapse", p: "vi.", z: "倒下；倒塌", d: "To fall down suddenly.", e: "The exhausted runner collapsed at the finish line." },
+            { l: 1, w: "medical", p: "adj.", z: "醫療的", d: "Related to the treatment of illness.", e: "She is reading a medical journal." },
+            { l: 1, w: "staff", p: "n. [U, C]", z: "全體員工", d: "The group of people who work for an organization.", e: "The medical staff worked all night." },
+            { l: 1, w: "courage", p: "n. [U]", z: "勇氣", d: "The ability to do something that scares you.", e: "It takes courage to speak in front of a crowd." },
+            { l: 1, w: "strength", p: "n. [U]", z: "意志力；力量", d: "Mental or physical power.", e: "She didn't have the strength to lift the box." },
+            { l: 1, w: "support", p: "n./vt.", z: "支持；支撐", d: "To help someone practically or emotionally.", e: "I couldn't have done it without my family's support." },
+            { l: 1, w: "struggle", p: "vi./n.", z: "奮力；爭取", d: "To try very hard to do something difficult.", e: "Many students struggle with English grammar." },
+            { l: 1, w: "pride", p: "n. [U]", z: "驕傲；得意", d: "A feeling of deep pleasure from achievements.", e: "He looked at his painting with great pride." },
+            { l: 1, w: "proud", p: "adj.", z: "驕傲的", d: "Feeling pleased about something you have done.", e: "They are very proud of their son." },
+            { l: 1, w: "emotion", p: "n. [C, U]", z: "情緒", d: "A strong feeling such as love, anger, or sadness.", e: "She couldn't hide her emotions." },
+            { l: 1, w: "respect", p: "n./vt.", z: "尊敬", d: "Admiration felt for someone.", e: "You should show more respect for your teachers." },
+            
+            // Lesson 2
+            { l: 2, w: "warn", p: "vt.", z: "警告；提醒", d: "To tell someone about a possible danger.", e: "The teacher warned students not to cheat." },
+            { l: 2, w: "announcement", p: "n. [C]", z: "公告", d: "A public formal statement.", e: "The principal made an announcement." },
+            { l: 2, w: "research", p: "n./vt.", z: "研究", d: "Detailed study to discover new info.", e: "He is researching the effects of climate change." },
+            { l: 2, w: "flavor", p: "n. [U, C]", z: "味道", d: "The particular taste of a food or drink.", e: "Vanilla is my favorite ice cream flavor." },
+            { l: 2, w: "pressure", p: "n. [U]", z: "壓力", d: "A feeling of stress because of expectations.", e: "Students face a lot of academic pressure." },
+            { l: 2, w: "normally", p: "adv.", z: "通常", d: "If things happen in the usual way.", e: "I normally wake up at 7 a.m." },
+            { l: 2, w: "distinguish", p: "vi./vt.", z: "分辨", d: "To recognize the difference.", e: "It's hard to distinguish the twins from each other." },
+            { l: 2, w: "accurate", p: "adj.", z: "精確的", d: "Correct, exact, and without mistakes.", e: "The witness provided an accurate description." },
+            { l: 2, w: "function", p: "vi./n.", z: "運作；功能", d: "The natural purpose of something.", e: "The main function of the heart is to pump blood." },
+            { l: 2, w: "blame", p: "vt.", z: "歸咎於", d: "To say someone is responsible for something bad.", e: "Don't blame him for the accident." },
+            { l: 2, w: "affect", p: "vt.", z: "影響", d: "To have an influence on someone or something.", e: "The bad weather will affect our travel plans." },
+            { l: 2, w: "passenger", p: "n. [C]", z: "乘客", d: "A person traveling in a vehicle.", e: "The driver asked all passengers to wear seatbelts." },
+            { l: 2, w: "distract", p: "vt.", z: "使分心", d: "To stop someone's attention.", e: "The loud noise distracted me from my studies." },
+            { l: 2, w: "indicate", p: "vt.", z: "指出", d: "To show, point, or make clear.", e: "The results indicate that students want more sports." },
+            { l: 2, w: "condition", p: "n. [U]", z: "狀況；環境", d: "The particular state something is in.", e: "The car is in excellent condition." },
+            { l: 2, w: "solution", p: "n. [C]", z: "解決方法", d: "The answer to a problem.", e: "We need to find a solution to the pollution." },
+            { l: 2, w: "ingredient", p: "n. [C]", z: "成分", d: "A food used to prepare a dish.", e: "Flour and eggs are the main ingredients for a cake." },
+            { l: 2, w: "compare", p: "vt.", z: "比較", d: "To look for the difference between things.", e: "If you compare the two phones, the new one is better." },
+            { l: 2, w: "remain", p: "vi.", z: "保持", d: "To stay in the same place or condition.", e: "Please remain seated until the bell rings." },
+            { l: 2, w: "provide", p: "vt.", z: "提供", d: "To give someone something they need.", e: "The hotel provides free Wi-Fi." },
+            
+            // Lesson 3
+            { l: 3, w: "grace", p: "n. [U]", z: "優美；優雅", d: "Moving in a smooth, attractive way.", e: "The ballerina moved with effortless grace." },
+            { l: 3, w: "desperate", p: "adj.", z: "非常需要的", d: "Needing or wanting something very much.", e: "The homeless man was in desperate need of food." },
+            { l: 3, w: "reluctant", p: "adj.", z: "不情願的", d: "Not willing to do something.", e: "He was reluctant to lend his car." },
+            { l: 3, w: "describe", p: "vt.", z: "描述", d: "To say what someone or something is like.", e: "Can you describe what the dog looks like?" },
+            { l: 3, w: "shiver", p: "vi.", z: "顫抖", d: "To shake slightly because of cold or fear.", e: "The boy began to shiver in the wind." },
+            { l: 3, w: "faint", p: "vi.", z: "昏厥", d: "To suddenly become unconscious.", e: "It was so hot that several people fainted." },
+            { l: 3, w: "scientific", p: "adj.", z: "科學的", d: "Relating to science.", e: "We need scientific evidence to prove this." },
+            { l: 3, w: "frustration", p: "n. [U]", z: "沮喪", d: "Feeling annoyed because you can't achieve something.", e: "He sighed in frustration." },
+            { l: 3, w: "stubborn", p: "adj.", z: "頑固的", d: "Determined not to change your opinion.", e: "My brother is too stubborn to admit he's wrong." },
+            { l: 3, w: "rage", p: "n. [C, U]", z: "暴怒", d: "Extreme or violent anger.", e: "He smashed the vase in a fit of rage." },
+            { l: 3, w: "concentrate", p: "vi. vt.", z: "專注", d: "To direct your attention towards an activity.", e: "I can't concentrate with all that noise." },
+            { l: 3, w: "explain", p: "vt. vi.", z: "解釋", d: "To make something clear or easy to understand.", e: "The teacher explained the formula." },
+            { l: 3, w: "sincere", p: "adj.", z: "真誠的", d: "Honest and not pretending.", e: "He is a sincere friend." },
+            { l: 3, w: "confess", p: "vt. vi.", z: "坦白；認罪", d: "To admit you have done something wrong.", e: "The thief confessed to stealing." },
+            { l: 3, w: "restore", p: "vt.", z: "使復原", d: "To return something to an earlier good condition.", e: "The museum is trying to restore the painting." },
+            { l: 3, w: "fade", p: "vi.", z: "逐漸消失", d: "To slowly disappear or become weaker.", e: "The colors of the sunset began to fade." },
+            { l: 3, w: "hardly", p: "adv.", z: "幾乎不", d: "Only just; almost not.", e: "I could hardly keep my eyes open." },
+            { l: 3, w: "trace", p: "n. [C, U]", z: "痕跡", d: "A sign that something has existed.", e: "The police found no trace of the suspect." },
+            { l: 3, w: "depart", p: "vi.", z: "離開；出發", d: "To go away or leave.", e: "The train is scheduled to depart at 8 AM." },
+            { l: 3, w: "regret", p: "vt.", z: "懊悔；遺憾", d: "To feel sorry about a mistake.", e: "I deeply regret hurting your feelings." },
+
+            // Review 1
+            { l: 'R1', w: "disagree", p: "vi.", z: "不同意", d: "To not have the same opinion.", e: "I disagree with you on this issue." },
+            { l: 'R1', w: "delightful", p: "adj.", z: "令人愉快的", d: "Very pleasant or enjoyable.", e: "We had a delightful evening." },
+            { l: 'R1', w: "typically", p: "adv.", z: "一般而言", d: "In a way that shows expected characteristics.", e: "Summer here is typically very hot." },
+            { l: 'R1', w: "affair", p: "n. [C]", z: "活動", d: "A situation, event, or subject.", e: "The school fair was a successful affair." },
+            { l: 'R1', w: "spread", p: "vi.", z: "傳播", d: "To reach or have effect on a wider area.", e: "The news spread quickly." },
+            { l: 'R1', w: "engagement", p: "n. [C]", z: "約會", d: "An arrangement to do something.", e: "I have another engagement tonight." },
+            { l: 'R1', w: "host", p: "n. [C]", z: "主人", d: "Someone who has guests.", e: "He was a wonderful host." },
+            { l: 'R1', w: "quality", p: "n. [U]", z: "品質", d: "How good or bad something is.", e: "This store sells high-quality products." },
+            { l: 'R1', w: "exquisite", p: "adj.", z: "精緻的", d: "Very beautiful and delicate.", e: "She wore an exquisite necklace." },
+            { l: 'R1', w: "luxurious", p: "adj.", z: "奢華的", d: "Very comfortable and expensive.", e: "They stayed in a luxurious hotel." },
+            { l: 'R1', w: "characteristic", p: "adj.", z: "獨特的", d: "Typical of a particular person/thing.", e: "Spicy flavor is characteristic of Mexican food." },
+            { l: 'R1', w: "agriculture", p: "n. [U]", z: "農業", d: "Farming and raising crops.", e: "Agriculture is important to the economy." },
+            { l: 'R1', w: "starving", p: "adj.", z: "非常飢餓的", d: "Very hungry.", e: "I skipped breakfast and I'm starving." },
+            { l: 'R1', w: "energy", p: "n. [U]", z: "能量", d: "The power to be active.", e: "Children have endless energy." },
+            { l: 'R1', w: "fundamental", p: "adj.", z: "重要的；基礎的", d: "Forming the base.", e: "Reading is a fundamental skill." },
+            { l: 'R1', w: "restricted", p: "adj.", z: "受限的", d: "Limited by rules.", e: "Access to the base is restricted." }
+        ];
+
+        const idiomList = [
+            // L1
+            { l: 1, w: "take off", p: "phr.", z: "起飛/出發", d: "To leave a place or rise from the ground.", e: "The plane took off into the air." },
+            { l: 1, w: "have one’s heart set on", p: "phr.", z: "一心想做", d: "To want something with all your heart.", e: "Toby has his heart set on being an NBA player." },
+            { l: 1, w: "speed up", p: "phr.", z: "加速", d: "To move faster.", e: "We need to speed up." },
+            { l: 1, w: "rise to one’s feet", p: "phr.", z: "站起來", d: "To stand up.", e: "The boxer rose to his feet." },
+            { l: 1, w: "carry through", p: "phr.", z: "幫...渡過難關", d: "To help someone get through a difficult time.", e: "Evan's support carried Mandy through." },
+            // L2
+            { l: 2, w: "be used to", p: "phr.", z: "習慣於", d: "To feel something is normal.", e: "Arnold is used to the hot weather." },
+            { l: 2, w: "needless to say", p: "phr.", z: "不用說", d: "Used when information is obvious.", e: "Needless to say, she got a promotion." },
+            { l: 2, w: "believe it or not", p: "phr.", z: "信不信由你", d: "Indicates something is true but surprising.", e: "Believe it or not, you won!" },
+            { l: 2, w: "come up with", p: "phr.", z: "想出", d: "To think of an idea.", e: "We came up with a great plan." },
+            { l: 2, w: "in comparison with", p: "phr.", z: "相較之下", d: "When compared with.", e: "In comparison with Greenland, Taiwan is small." },
+            { l: 2, w: "regardless of", p: "phr.", z: "不管", d: "Without being affected by.", e: "We will go regardless of the weather." },
+            // L3
+            { l: 3, w: "put aside", p: "phr.", z: "擱置", d: "To stop doing something to do something else.", e: "She put aside her work." },
+            { l: 3, w: "from then on", p: "phr.", z: "從那時起", d: "Beginning at a certain time.", e: "I took my studies seriously from then on." },
+            { l: 3, w: "all the more", p: "phr.", z: "更加", d: "To a greater degree.", e: "She became all the more excited." },
+            { l: 3, w: "fly into a rage", p: "phr.", z: "勃然大怒", d: "To quickly get very angry.", e: "He flew into a rage when he heard the news." },
+            { l: 3, w: "for one thing", p: "phr.", z: "首先", d: "Used to introduce a reason.", e: "For one thing, the food is delicious." },
+            { l: 3, w: "be filled with", p: "phr.", z: "充滿", d: "To be full of.", e: "The streets are filled with music." },
+            { l: 3, w: "slip away", p: "phr.", z: "消逝；死去", d: "To leave quietly or die.", e: "He quietly slipped away in the morning." },
+            // R1
+            { l: 'R1', w: "hear of", p: "phr.", z: "聽說過", d: "To know about someone/something.", e: "I've never heard of that writer." },
+            { l: 'R1', w: "make it to", p: "phr.", z: "成功抵達", d: "To successfully arrive.", e: "We finally made it to the concert." },
+            { l: 'R1', w: "ask for", p: "phr.", z: "要求", d: "To request something.", e: "He asked for help." },
+            { l: 'R1', w: "invite someone over", p: "phr.", z: "邀請到家", d: "To invite someone to your house.", e: "Let's invite them over for dinner." },
+            { l: 'R1', w: "refer to", p: "phr.", z: "稱呼", d: "To call someone by a name.", e: "Please refer to him by his first name." },
+            { l: 'R1', w: "as possible", p: "phr.", z: "儘可能", d: "To the greatest degree.", e: "Finish it as soon as possible." }
+        ];
+
+        // --- 2. State Management ---
+        let activeDeckType = 'vocab'; 
+        let currentMode = 'welcome'; 
+        let currentQueue = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+        let synth = window.speechSynthesis;
+        let correctOptionIndex = -1;
+        
+        let wrongWordsQueue = [];
+        
+        let isTimerOn = false;
+        let is2PMode = false;
+        let globalTimer = null;
+        let globalTimeLeft = 0;
+        let globalTimeTotal = 0;
+        let isGlobalTimerRunning = false;
+        let speechRate = 0.8;
+        
+        let p1Score = 0;
+        let p2Score = 0;
+        let currentPlayer = 1;
+        let currentCombo = 0; 
+
+        let typingAttempts = 0;
+        let taTimer = null; let taTimeLeft = 60; let taScore = 0;
+        let matchCards = []; let firstSelection = null; let matchedCount = 0;
+
+        const macaronClasses = ['macaron-1', 'macaron-2', 'macaron-3', 'macaron-4', 'macaron-5', 'macaron-6'];
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // --- Audio & FX ---
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(); const gainNode = audioCtx.createGain();
+            osc.connect(gainNode); gainNode.connect(audioCtx.destination);
+            
+            if(type === 'flip' || type === 'click' || type === 'select') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(type==='select'?800:600, audioCtx.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'wrong') {
+                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+            } else if (type === 'success' || type === 'match' || type === 'combo') {
+                const notes = type==='match' ? [659.25, 1046.50] : (type==='combo' ? [523.25, 659.25, 783.99, 1046.50, 1318.51] : [523.25, 659.25, 783.99, 1046.50]);
+                let startTime = audioCtx.currentTime;
+                notes.forEach((freq, i) => {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'triangle'; o.frequency.value = freq;
+                    g.gain.setValueAtTime(0, startTime + i * 0.1);
+                    g.gain.linearRampToValueAtTime(0.2, startTime + i * 0.1 + 0.05);
+                    g.gain.linearRampToValueAtTime(0, startTime + i * 0.1 + 0.2);
+                    o.start(startTime + i * 0.1); o.stop(startTime + i * 0.1 + 0.2);
+                });
+            } else if (type === 'alarm') {
+                let startTime = audioCtx.currentTime;
+                for(let i=0; i<4; i++) {
+                    const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'square'; o.frequency.value = 800;
+                    g.gain.setValueAtTime(0, startTime + i * 0.2);
+                    g.gain.linearRampToValueAtTime(0.2, startTime + i * 0.2 + 0.05);
+                    g.gain.linearRampToValueAtTime(0, startTime + i * 0.2 + 0.15);
+                    o.start(startTime + i * 0.2); o.stop(startTime + i * 0.2 + 0.15);
+                }
+            }
+        }
+
+        // --- Core Logic ---
+        function shuffle(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+            return arr; 
+        }
+        function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+        
+        function getFilteredData() {
+            let dataSource = [];
+            if (activeDeckType === 'vocab') dataSource = vocabList;
+            else if (activeDeckType === 'idiom') dataSource = idiomList;
+            else if (activeDeckType === 'mistakes') dataSource = wrongWordsQueue; 
+
+            const selectedLesson = document.getElementById('lessonFilter').value;
+            if (selectedLesson === 'all') return dataSource;
+            return dataSource.filter(item => item.l == selectedLesson);
+        }
+
+        function addToMistakes(item) {
+            currentCombo = 0; updateComboUI();
+            if (!item) return;
+            if (!wrongWordsQueue.find(i => i.w === item.w)) {
+                wrongWordsQueue.push(item);
+                const countBadge = document.getElementById('mistakes-count');
+                if(countBadge) {
+                    countBadge.innerText = wrongWordsQueue.length;
+                    countBadge.classList.add('scale-150');
+                    setTimeout(() => countBadge.classList.remove('scale-150'), 300);
+                }
+            }
+        }
+
+        function removeFromMistakes(item) {
+            if (!item) return;
+            const index = wrongWordsQueue.findIndex(i => i.w === item.w);
+            if (index > -1) {
+                wrongWordsQueue.splice(index, 1);
+                const countBadge = document.getElementById('mistakes-count');
+                if(countBadge) countBadge.innerText = wrongWordsQueue.length;
+            }
+        }
+
+        function updateComboUI() {
+            const badge = document.getElementById('combo-badge');
+            if(!badge) return;
+            if (currentCombo >= 3 && currentMode !== 'welcome') {
+                badge.classList.remove('hidden');
+                document.getElementById('combo-count').innerText = currentCombo;
+                badge.classList.remove('flame-up');
+                void badge.offsetWidth; 
+                badge.classList.add('flame-up');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function getFullItemByWord(word) {
+            let item = vocabList.find(i => i.w === word);
+            if (!item) item = idiomList.find(i => i.w === word);
+            return item;
+        }
+
+        function downloadMistakes() {
+            playSound('click');
+            if (wrongWordsQueue.length === 0) { alert("太棒了！目前沒有錯題可以下載喔！✨"); return; }
+            
+            let csvContent = "\uFEFF"; 
+            csvContent += "單字/片語,詞性,中文,英文定義,例句\n";
+            wrongWordsQueue.forEach(item => {
+                const w = `"${item.w.replace(/"/g, '""')}"`; const p = `"${item.p.replace(/"/g, '""')}"`; const z = `"${item.z.replace(/"/g, '""')}"`;
+                const d = `"${item.d.replace(/"/g, '""')}"`; const e = `"${item.e.replace(/"/g, '""')}"`;
+                csvContent += `${w},${p},${z},${d},${e}\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.setAttribute("href", url); link.setAttribute("download", "Joyce_錯題本.csv");
+            document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        }
+
+        function toggleSettingsPanel() {
+            playSound('click');
+            const panel = document.getElementById('settings-panel');
+            if(panel) { panel.classList.toggle('hidden'); panel.classList.toggle('flex'); }
+        }
+        
+        function toggleSpeechRate() {
+            playSound('click');
+            const btn = document.getElementById('btn-toggle-speed');
+            if(!btn) return;
+            if (speechRate === 0.8) {
+                speechRate = 0.5; 
+                btn.innerHTML = '<i class="fa-solid fa-turtle text-green-500"></i> 語速: 慢速';
+            } else {
+                speechRate = 0.8; 
+                btn.innerHTML = '<i class="fa-solid fa-rabbit text-pink-400"></i> 語速: 正常';
+            }
+        }
+
+        function resetGlobalTimer() {
+            clearInterval(globalTimer); isGlobalTimerRunning = false;
+            const sel = document.getElementById('timer-select');
+            if(!sel) return;
+            const val = parseInt(sel.value);
+            globalTimeTotal = val; globalTimeLeft = val;
+            
+            const displayTop = document.getElementById('global-timer-display-top');
+            const displayMain = document.getElementById('global-timer-display-main');
+            
+            if (val === 0) {
+                isTimerOn = false; if (displayTop) displayTop.classList.add('hidden');
+            } else {
+                isTimerOn = true;
+                if (currentMode !== 'timeattack' && currentMode !== 'welcome') { if (displayTop) displayTop.classList.remove('hidden'); }
+                updateGlobalTimerDisplay();
+                if (displayTop) { displayTop.classList.replace('text-red-500', 'text-blue-500'); displayTop.classList.remove('animate-bounce', 'border-red-400'); }
+            }
+        }
+
+        function startGlobalTimer() {
+            if (globalTimeTotal === 0 || isGlobalTimerRunning || globalTimeLeft <= 0) return;
+            isGlobalTimerRunning = true; playSound('click');
+            globalTimer = setInterval(() => {
+                globalTimeLeft--; updateGlobalTimerDisplay();
+                const displayTop = document.getElementById('global-timer-display-top');
+                if (globalTimeLeft <= 10 && globalTimeLeft > 0) {
+                    if(displayTop) { displayTop.classList.replace('text-blue-500', 'text-red-500'); displayTop.classList.add('animate-bounce'); }
+                } else {
+                    if(displayTop) { displayTop.classList.replace('text-red-500', 'text-blue-500'); displayTop.classList.remove('animate-bounce'); }
+                }
+                if (globalTimeLeft <= 0) { clearInterval(globalTimer); isGlobalTimerRunning = false; handleGlobalTimeUp(); }
+            }, 1000);
+        }
+
+        function pauseGlobalTimer() { if (!isGlobalTimerRunning) return; playSound('click'); isGlobalTimerRunning = false; clearInterval(globalTimer); }
+        function stopGlobalTimer() { playSound('click'); resetGlobalTimer(); }
+
+        function updateGlobalTimerDisplay() {
+            const m = Math.floor(globalTimeLeft / 60).toString().padStart(2, '0'); const s = (globalTimeLeft % 60).toString().padStart(2, '0');
+            const timeStr = `${m}:${s}`;
+            const topSec = document.getElementById('global-time-sec-top'); if (topSec) topSec.innerText = timeStr;
+            const mainSec = document.getElementById('global-time-sec-main'); if (mainSec) mainSec.innerText = timeStr;
+        }
+
+        function handleGlobalTimeUp() {
+            playSound('alarm'); 
+            const ol = document.getElementById('global-timeup-overlay'); if(ol) ol.style.display = 'flex';
+            const ts = document.getElementById('timer-select'); if(ts) ts.value = "0"; 
+            resetGlobalTimer(); 
+            confetti({ particleCount: 50, spread: 100, origin: { y: 0.5 }, colors: ['#ff0000', '#ffb3c6'] });
+        }
+
+        function toggle2PMode() {
+            is2PMode = !is2PMode;
+            const btn = document.getElementById('btn-toggle-2p'); const board = document.getElementById('scoreboard-2p');
+            const fc1pBtn = document.getElementById('fc-1p-btn'); const fc2pCtrls = document.getElementById('fc-2p-controls');
+
+            if (is2PMode) {
+                if(btn) { btn.innerHTML = '<i class="fa-solid fa-user-group"></i> 雙人對戰: 開啟'; btn.classList.replace('text-gray-600', 'text-pink-500'); }
+                if (currentMode !== 'welcome' && board) board.classList.remove('hidden');
+                if(fc1pBtn) fc1pBtn.classList.add('hidden'); if(fc2pCtrls) fc2pCtrls.classList.remove('hidden');
+                p1Score = 0; p2Score = 0; currentPlayer = 1; updateScoreUI();
+            } else {
+                if(btn) { btn.innerHTML = '<i class="fa-solid fa-user-group"></i> 雙人對戰: 關閉'; btn.classList.replace('text-pink-500', 'text-gray-600'); }
+                if(board) board.classList.add('hidden');
+                if(fc1pBtn) fc1pBtn.classList.remove('hidden'); if(fc2pCtrls) fc2pCtrls.classList.add('hidden');
+            }
+            playSound('click');
+        }
+
+        function addScoreAndSwitchTurn(points) {
+            if(is2PMode) {
+                if(currentPlayer === 1) p1Score += points; else p2Score += points;
+                currentPlayer = currentPlayer === 1 ? 2 : 1; updateScoreUI();
+            }
+        }
+        function switchTurnOnly() { if(is2PMode) { currentPlayer = currentPlayer === 1 ? 2 : 1; updateScoreUI(); } }
+        function updateScoreUI() {
+            const p1s = document.getElementById('p1-score'); if(p1s) p1s.innerText = p1Score; 
+            const p2s = document.getElementById('p2-score'); if(p2s) p2s.innerText = p2Score;
+            
+            const p1p = document.getElementById('p1-panel'); const p2p = document.getElementById('p2-panel');
+            if(!p1p || !p2p) return;
+
+            if(currentPlayer === 1) {
+                p1p.className = "flex-1 bg-pink-400 text-white font-black py-0.5 rounded-lg text-center border border-pink-300 p-active shadow-sm text-sm";
+                p2p.className = "flex-1 bg-blue-400 text-white font-black py-0.5 rounded-lg text-center border border-blue-300 p-inactive shadow-sm text-sm opacity-50";
+            } else {
+                p2p.className = "flex-1 bg-blue-400 text-white font-black py-0.5 rounded-lg text-center border border-blue-300 p-active shadow-sm text-sm";
+                p1p.className = "flex-1 bg-pink-400 text-white font-black py-0.5 rounded-lg text-center border border-pink-300 p-inactive shadow-sm text-sm opacity-50";
+            }
+        }
+        function manualScore(player) {
+            if(player === 1) p1Score += 1; else p2Score += 1;
+            playSound('success'); updateScoreUI(); nextItem(false);
+        }
+
+        function show2PWinner() {
+            playSound('success'); confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+            const overlay = document.getElementById('global-2p-winner-overlay'); const winnerText = document.getElementById('2p-winner-text'); const scoreText = document.getElementById('2p-final-score');
+            if(!overlay || !winnerText || !scoreText) return;
+
+            if (p1Score > p2Score) { winnerText.innerText = "🏆 P1 獲勝！"; scoreText.innerText = `${p1Score} : ${p2Score}`; } 
+            else if (p2Score > p1Score) { winnerText.innerText = "🏆 P2 獲勝！"; scoreText.innerText = `${p1Score} : ${p2Score}`; } 
+            else { winnerText.innerText = "🤝 平手！"; scoreText.innerText = `${p1Score} : ${p2Score}`; }
+            overlay.style.display = 'flex';
+        }
+
+        function close2PWinnerAndRestart() {
+            const overlay = document.getElementById('global-2p-winner-overlay'); if(overlay) overlay.style.display = 'none';
+            p1Score = 0; p2Score = 0; currentPlayer = 1; updateScoreUI(); initGame();
+        }
+
+        function changeLesson() { playSound('click'); initGame(); }
+        function switchDeck(type) {
+            if (activeDeckType === type) return; activeDeckType = type;
+            
+            const btnV = document.getElementById('btn-vocab'); const btnI = document.getElementById('btn-idiom'); const btnM = document.getElementById('btn-mistakes');
+            if(btnV) btnV.className = `jelly-btn flex-1 rounded-lg text-xs font-bold border-2 transition-all ${type==='vocab'?'tab-active':'tab-inactive'}`;
+            if(btnI) btnI.className = `jelly-btn flex-1 rounded-lg text-xs font-bold border-2 transition-all ${type==='idiom'?'tab-active':'tab-inactive'}`;
+            
+            if(btnM) {
+                if(type === 'mistakes') { btnM.className = `jelly-btn flex-1 rounded-lg text-[10px] font-bold border-2 transition-all tab-mistake-active flex items-center justify-center gap-0.5 relative`; } 
+                else { btnM.className = `jelly-btn flex-1 rounded-lg text-[10px] font-bold border-2 transition-all tab-inactive flex items-center justify-center gap-0.5 relative`; }
+            }
+            playSound('click'); initGame();
+        }
+
+        function changeModeFromSelect() {
+            const modeFilter = document.getElementById('modeFilter');
+            if(!modeFilter) return;
+            const mode = modeFilter.value;
+            if (mode && mode !== 'welcome') { switchMode(mode); }
+        }
+
+        function switchMode(mode) {
+            if (currentMode === mode) return;
+            if (taTimer) clearInterval(taTimer);
+            
+            const taOverlay = document.getElementById('ta-overlay'); if(taOverlay) taOverlay.style.display = 'none'; 
+            const taStart = document.getElementById('ta-start-btn'); if(taStart) taStart.style.display = 'block'; 
+            const mOverlay = document.getElementById('match-overlay'); if(mOverlay) mOverlay.style.display = 'none';
+            
+            const displayTop = document.getElementById('global-timer-display-top');
+            if (isTimerOn) {
+                if(mode === 'timeattack' || mode === 'welcome') { if (displayTop) displayTop.classList.add('hidden'); } 
+                else { if (displayTop) displayTop.classList.remove('hidden'); }
+            }
+
+            const board2p = document.getElementById('scoreboard-2p');
+            if (is2PMode && mode !== 'welcome') { if(board2p) board2p.classList.remove('hidden'); } else { if(board2p) board2p.classList.add('hidden'); }
+
+            currentMode = mode;
+            currentCombo = 0; updateComboUI();
+            
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            
+            const vType = document.getElementById('view-typing');
+            const vMc = document.getElementById('view-mc');
+            const vTarget = document.getElementById(`view-${mode}`);
+
+            if(mode === 'typing' || mode === 'dictation' || mode === 'scramble' || mode === 'exact') { if(vType) vType.classList.add('active'); }
+            else if (mode === 'mc-zh-en' || mode === 'mc-en-zh') { if(vMc) vMc.classList.add('active'); }
+            else { if(vTarget) vTarget.classList.add('active'); }
+
+            if (is2PMode) { p1Score = 0; p2Score = 0; currentPlayer = 1; updateScoreUI(); }
+            
+            const pCont = document.getElementById('progress-container');
+            if (pCont) {
+                if (mode !== 'welcome' && mode !== 'timeattack' && mode !== 'matching') { pCont.classList.remove('hidden'); }
+                else { pCont.classList.add('hidden'); }
+            }
+
+            playSound('click'); initGame();
+        }
+
+        function initGame() {
+            const filteredData = getFilteredData(); currentQueue = shuffle(filteredData); currentIndex = 0;
+            const fc = document.getElementById('flashcard');
+            if (isFlipped && fc) { fc.classList.remove('flipped'); isFlipped = false; }
+            
+            if (currentMode === 'welcome') { 
+                const pt = document.getElementById('progressText'); if(pt) pt.innerText = "0 / 0"; 
+                return; 
+            }
+
+            if (currentMode === 'matching') { setupMatchingBoard(); } 
+            else if (currentMode === 'timeattack') {
+                const tq = document.getElementById('ta-question'); if(tq) tq.innerText = "準備開始"; 
+                const to = document.getElementById('ta-options'); if(to) to.innerHTML = '';
+                const tt = document.getElementById('ta-time'); if(tt) tt.innerText = 60; 
+                const ts = document.getElementById('ta-score'); if(ts) ts.innerText = 0;
+                const pt = document.getElementById('progressText'); if(pt) pt.innerText = "生存模式";
+            } else { loadCurrentItem(); }
+        }
+
+        function updateProgress() {
+            const pt = document.getElementById('progressText');
+            const pb = document.getElementById('progress-bar-fill');
+            
+            if(currentQueue.length === 0) { 
+                if(pt) pt.innerText = `0 / 0`; 
+                if(pb) pb.style.width = '0%';
+                return; 
+            }
+            if(pt) pt.innerText = `${currentIndex + 1} / ${currentQueue.length}`;
+            if(pb) pb.style.width = `${((currentIndex + 1) / currentQueue.length) * 100}%`;
+        }
+
+        function loadCurrentItem() {
+            if(currentQueue.length === 0) {
+                if (activeDeckType === 'mistakes') { alert("太棒了！這個範圍目前沒有錯題喔！✨"); } else { alert("這個課次目前沒有資料喔！"); }
+                return; 
+            }
+            if (currentIndex >= currentQueue.length) { 
+                if (is2PMode && currentMode !== 'timeattack' && currentMode !== 'matching') { show2PWinner(); } else { initGame(); } return; 
+            }
+            
+            const item = currentQueue[currentIndex]; updateProgress();
+
+            if (currentMode === 'flashcard') {
+                const fp = document.getElementById('fc-pos'); if(fp) fp.innerText = item.p; 
+                const fd = document.getElementById('fc-def'); if(fd) fd.innerText = item.d;
+                const fw = document.getElementById('fc-word'); if(fw) fw.innerText = item.w; 
+                const fz = document.getElementById('fc-zh'); if(fz) fz.innerText = item.z; 
+                const fe = document.getElementById('fc-ex'); if(fe) fe.innerText = item.e;
+                const front = document.getElementById('cardFront'); const back = document.getElementById('cardBack');
+                if(front && back) {
+                    macaronClasses.forEach(c => { front.classList.remove(c); back.classList.remove(c); });
+                    front.classList.add(getRandomElement(macaronClasses)); back.classList.add(getRandomElement(macaronClasses));
+                }
+            } else if (currentMode === 'mc-zh-en' || currentMode === 'mc-en-zh') {
+                setupMultipleChoice(item);
+            } else if (currentMode === 'typing' || currentMode === 'dictation' || currentMode === 'scramble' || currentMode === 'exact') {
+                setupTypingView(item, currentMode);
+            }
+        }
+
+        // --- MC Logic ---
+        function createOptionBtn(primaryText, secondaryText, index, onClickHandler) {
+            const letters = ['A', 'B', 'C', 'D']; const letter = letters[index];
+            const btn = document.createElement('button');
+            btn.className = "w-full bg-white/90 border-2 border-white p-2 rounded-xl shadow-sm text-sm font-extrabold text-gray-700 text-left transition-all hover:bg-white hover:shadow-md jelly-btn flex items-start gap-1.5 min-h-[4.5rem]";
+            btn.innerHTML = `<div class="letter-badge flex-shrink-0 w-6 h-6 rounded-full bg-pink-100 text-pink-500 flex items-center justify-center font-black border border-pink-200 text-xs shadow-sm mt-0.5 transition-colors">${letter}</div>
+                             <div class="flex flex-col flex-1"><span class="leading-tight break-words text-sm">${primaryText}</span><span class="mc-translation hidden text-[10px] text-gray-400 mt-0.5">${secondaryText}</span></div>`;
+            btn.onclick = () => onClickHandler(index, btn);
+            return btn;
+        }
+
+        function setupMultipleChoice(item) {
+            const qCard = document.getElementById('mc-q-card'); const badge = document.getElementById('mc-badge');
+            const questionText = document.getElementById('mc-question'); const speakBtn = document.getElementById('mc-speak-btn');
+            const optionsContainer = document.getElementById('mc-options');
+            if(!qCard || !optionsContainer) return;
+            
+            macaronClasses.forEach(c => qCard.classList.remove(c)); qCard.classList.add(getRandomElement(macaronClasses));
+
+            const dataSource = activeDeckType === 'vocab' ? vocabList : (activeDeckType === 'idiom' ? idiomList : vocabList.concat(idiomList));
+            let options = [item]; let safeGuard = 0;
+            while(options.length < 4 && safeGuard < 50 && dataSource.length >= 4) {
+                let randomItem = getRandomElement(dataSource);
+                if(!options.find(o => o.w === randomItem.w)) options.push(randomItem); safeGuard++;
+            }
+            options = shuffle(options); correctOptionIndex = options.findIndex(o => o.w === item.w);
+            optionsContainer.innerHTML = '';
+            
+            if(currentMode === 'mc-zh-en') {
+                if(badge) badge.innerText = "請選出英文"; if(questionText) questionText.innerText = item.z; if(speakBtn) speakBtn.style.display = 'none';
+                options.forEach((opt, idx) => { optionsContainer.appendChild(createOptionBtn(opt.w, opt.z, idx, handleMcAnswer)); });
+            } else {
+                if(badge) badge.innerText = "請選出中文"; if(questionText) questionText.innerText = item.w; if(speakBtn) speakBtn.style.display = 'flex';
+                options.forEach((opt, idx) => { optionsContainer.appendChild(createOptionBtn(opt.z, opt.w, idx, handleMcAnswer)); });
+            }
+        }
+
+        function handleMcAnswer(index, btn) {
+            const allBtns = document.getElementById('mc-options').querySelectorAll('button');
+            allBtns.forEach(b => { b.disabled = true; const trans = b.querySelector('.mc-translation'); if(trans) trans.classList.remove('hidden'); });
+
+            if(index === correctOptionIndex) {
+                btn.classList.remove('bg-white/90', 'text-gray-700'); btn.classList.add('bg-green-400', 'text-white', 'border-green-300');
+                const trans = btn.querySelector('.mc-translation'); if(trans) trans.classList.replace('text-gray-400', 'text-green-100');
+                const badge = btn.querySelector('.letter-badge');
+                if(badge) { badge.className = 'letter-badge flex-shrink-0 w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center font-black border border-green-400 text-xs shadow-sm mt-0.5'; badge.innerHTML = '<i class="fa-solid fa-check"></i>'; }
+                
+                removeFromMistakes(currentQueue[currentIndex]); 
+                addScoreAndSwitchTurn(1); handleSuccess();
+            } else {
+                playSound('wrong'); addToMistakes(currentQueue[currentIndex]); 
+                
+                btn.classList.add('shake', 'bg-gray-200', 'text-gray-400', 'border-gray-300'); btn.classList.remove('bg-white/90');
+                const badge = btn.querySelector('.letter-badge');
+                if(badge) { badge.className = 'letter-badge flex-shrink-0 w-6 h-6 rounded-full bg-gray-300 text-gray-500 flex items-center justify-center font-black border border-gray-400 text-xs shadow-sm mt-0.5'; badge.innerHTML = '<i class="fa-solid fa-xmark"></i>'; }
+                
+                const correctBtn = allBtns[correctOptionIndex];
+                if(correctBtn) {
+                    correctBtn.classList.remove('bg-white/90', 'text-gray-700'); correctBtn.classList.add('border-green-400', 'text-green-700', 'bg-green-50');
+                    const cBadge = correctBtn.querySelector('.letter-badge');
+                    if(cBadge) { cBadge.className = 'letter-badge flex-shrink-0 w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center font-black border border-green-400 text-xs shadow-sm mt-0.5'; cBadge.innerHTML = '<i class="fa-solid fa-check"></i>'; }
+                }
+                
+                switchTurnOnly(); setTimeout(() => nextItem(false), 2500);
+            }
+        }
+
+        // --- Typing / Scramble / Dictation / Exact ---
+        function scrambleString(str) {
+            return str.split(' ').map(word => {
+                let arr = word.split('');
+                for(let i=arr.length-1; i>0; i--){ const j = Math.floor(Math.random()*(i+1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+                return arr.join('');
+            }).join(' &nbsp; ');
+        }
+        function getBlankedSentence(word, sentence) {
+            let root = word.length > 4 ? word.substring(0, word.length - 2) : word; let regex = new RegExp(`\\b${root}\\w*`, 'gi');
+            if(sentence.match(regex)) return sentence.replace(regex, '_______'); return sentence + " (_______)";
+        }
+        function generateBlankHint(word) {
+            if (word.includes(' ')) {
+                return word.split(' ').map((w, idx) => {
+                    if (w.length === 0) return '';
+                    if (idx === 0) return w[0] + ' _'.repeat(w.length - 1);
+                    return '_ '.repeat(w.length).trim();
+                }).join('   ');
+            } else {
+                if (word.length <= 2) return word;
+                return word[0] + ' _'.repeat(word.length - 2) + ' ' + word[word.length - 1];
+            }
+        }
+
+        function setupTypingView(item, mode) {
+            typingAttempts = 0; const qCard = document.getElementById('tp-q-card');
+            if(!qCard) return;
+            macaronClasses.forEach(c => qCard.classList.remove(c)); qCard.classList.add(getRandomElement(macaronClasses));
+
+            ['tp-header-typing', 'tp-header-dictation', 'tp-header-scramble', 'tp-sentence', 'dc-play-btn', 'sc-scrambled', 'es-hint-string', 'tp-speak-sent-btn', 'sc-speak-word-btn', 'dc-hint-text']
+                .forEach(id => { const el = document.getElementById(id); if(el) el.classList.add('hidden'); });
+
+            if(mode === 'typing') {
+                const tz = document.getElementById('tp-zh'); if(tz) tz.innerText = item.z; 
+                const tp = document.getElementById('tp-pos'); if(tp) tp.innerText = item.p; 
+                const ts = document.getElementById('tp-sentence'); if(ts) { ts.innerText = getBlankedSentence(item.w, item.e); ts.classList.remove('hidden'); }
+                const tht = document.getElementById('tp-header-typing'); if(tht) tht.classList.remove('hidden'); 
+                const tssb = document.getElementById('tp-speak-sent-btn'); if(tssb) tssb.classList.remove('hidden');
+            } else if (mode === 'scramble') {
+                const sz = document.getElementById('sc-zh'); if(sz) sz.innerText = item.z; 
+                const ss = document.getElementById('sc-scrambled'); if(ss) { ss.innerHTML = scrambleString(item.w); ss.classList.remove('hidden'); }
+                const ths = document.getElementById('tp-header-scramble'); if(ths) ths.classList.remove('hidden'); 
+                const sswb = document.getElementById('sc-speak-word-btn'); if(sswb) sswb.classList.remove('hidden');
+            } else if (mode === 'dictation') {
+                const thd = document.getElementById('tp-header-dictation'); if(thd) thd.classList.remove('hidden'); 
+                const dpb = document.getElementById('dc-play-btn'); if(dpb) dpb.classList.remove('hidden'); 
+                const dht = document.getElementById('dc-hint-text'); if(dht) dht.classList.remove('hidden');
+                setTimeout(() => speakWord(), 500);
+            } else if (mode === 'exact') {
+                const tz = document.getElementById('tp-zh'); if(tz) tz.innerText = item.z; 
+                const tp = document.getElementById('tp-pos'); if(tp) tp.innerText = item.p; 
+                const eh = document.getElementById('es-hint-string'); if(eh) { eh.innerHTML = generateBlankHint(item.w); eh.classList.remove('hidden'); }
+                const tht = document.getElementById('tp-header-typing'); if(tht) tht.classList.remove('hidden'); 
+                const sswb = document.getElementById('sc-speak-word-btn'); if(sswb) sswb.classList.remove('hidden');
+            }
+
+            const input = document.getElementById('tp-input');
+            if(input) { input.value = ''; input.className = "cute-input py-2 text-base font-mono tracking-wider"; input.disabled = false; setTimeout(() => input.focus(), 100); }
+        }
+
+        function handleTypingEnter(e) { if(e.key === 'Enter') checkTypingAnswer(); }
+
+        function checkTypingAnswer() {
+            const item = currentQueue[currentIndex]; if (!item) return; 
+            const input = document.getElementById('tp-input'); if(!input) return;
+            const val = input.value.trim().toLowerCase(); const target = item.w.toLowerCase();
+
+            if(val === target) {
+                input.className = "cute-input py-2 text-base font-mono tracking-wider bg-green-100 border-green-400 text-green-700"; input.disabled = true;
+                removeFromMistakes(item); addScoreAndSwitchTurn(1); handleSuccess();
+            } else {
+                typingAttempts++; addToMistakes(item);
+                let maxAttempts = (currentMode === 'exact') ? 2 : 3;
+                if (typingAttempts >= maxAttempts) { showAnswer(); } 
+                else {
+                    playSound('wrong'); input.classList.add('shake', 'border-red-400', 'text-red-500', 'bg-red-50');
+                    setTimeout(() => input.classList.remove('shake'), 500);
+                    if (typingAttempts === maxAttempts - 1 && currentMode !== 'exact') showHint();
+                }
+            }
+        }
+        function showHint() { const item = currentQueue[currentIndex]; if (!item) return; const input = document.getElementById('tp-input'); if(input){ input.value = item.w.substring(0, 2) + "..."; input.focus(); } }
+        function showAnswer() {
+            const item = currentQueue[currentIndex]; if (!item) return; 
+            const input = document.getElementById('tp-input'); if(!input) return;
+            input.value = item.w; input.className = "cute-input py-2 text-base font-mono tracking-wider bg-blue-50 border-blue-400 text-blue-600"; input.disabled = true;
+            playSound('wrong'); switchTurnOnly(); setTimeout(() => nextItem(false), 2500);
+        }
+
+        // --- Time Attack ---
+        function startTimeAttack() {
+            playSound('click'); 
+            const stb = document.getElementById('ta-start-btn'); if(stb) stb.style.display = 'none'; 
+            const ol = document.getElementById('ta-overlay'); if(ol) ol.style.display = 'none';
+            taTimeLeft = 60; taScore = 0; currentCombo = 0; updateComboUI();
+            
+            const tt = document.getElementById('ta-time'); if(tt) tt.innerText = taTimeLeft; 
+            const ts = document.getElementById('ta-score'); if(ts) ts.innerText = taScore;
+            
+            clearInterval(taTimer);
+            taTimer = setInterval(() => {
+                taTimeLeft--; if(taTimeLeft < 0) taTimeLeft = 0; 
+                const tt2 = document.getElementById('ta-time'); if(tt2) {
+                    tt2.innerText = taTimeLeft;
+                    const timeContainer = tt2.parentElement;
+                    if(taTimeLeft <= 10) timeContainer.classList.replace('bg-red-400', 'bg-red-600'); else timeContainer.classList.replace('bg-red-600', 'bg-red-400');
+                }
+                if(taTimeLeft <= 0) { clearInterval(taTimer); endTimeAttack(); }
+            }, 1000);
+
+            const dataSource = getFilteredData().length >= 4 ? getFilteredData() : vocabList.concat(idiomList);
+            currentQueue = shuffle(dataSource); currentIndex = 0; loadNextAttackItem();
+        }
+        function loadNextAttackItem() {
+            if(currentIndex >= currentQueue.length) { currentQueue = shuffle(currentQueue); currentIndex = 0; }
+            taCurrentItem = currentQueue[currentIndex];
+            if (!taCurrentItem) { clearInterval(taTimer); endTimeAttack(); return; }
+            const qCard = document.getElementById('ta-q-card');
+            if(qCard) { macaronClasses.forEach(c => qCard.classList.remove(c)); qCard.classList.add(getRandomElement(macaronClasses)); }
+            
+            const tq = document.getElementById('ta-question'); if(tq) tq.innerText = taCurrentItem.w;
+
+            const dataSource = vocabList.concat(idiomList); let options = [taCurrentItem]; let safeGuard = 0;
+            while(options.length < 4 && safeGuard < 50 && dataSource.length >= 4) {
+                let randomItem = getRandomElement(dataSource);
+                if(!options.find(o => o.w === randomItem.w)) options.push(randomItem); safeGuard++;
+            }
+            options = shuffle(options); correctOptionIndex = options.findIndex(o => o.w === taCurrentItem.w);
+            
+            const optionsContainer = document.getElementById('ta-options'); 
+            if(optionsContainer) {
+                optionsContainer.innerHTML = '';
+                options.forEach((opt, idx) => { optionsContainer.appendChild(createOptionBtn(opt.z, opt.w, idx, handleAttackAnswer)); });
+            }
+            if(qCard) { qCard.classList.remove('pop-in'); void qCard.offsetWidth; qCard.classList.add('pop-in'); }
+        }
+        function handleAttackAnswer(index, btn) {
+            const optionsContainer = document.getElementById('ta-options');
+            if(optionsContainer) {
+                const allBtns = optionsContainer.querySelectorAll('button'); allBtns.forEach(b => b.disabled = true);
+            }
+            if(index === correctOptionIndex) {
+                currentCombo++; updateComboUI();
+                if(currentCombo >= 3) playSound('combo'); else playSound('success');
+                
+                btn.classList.replace('bg-white/90', 'bg-green-400'); btn.classList.add('text-white', 'border-green-300');
+                removeFromMistakes(taCurrentItem); 
+                taScore += 1; const ts = document.getElementById('ta-score'); if(ts) ts.innerText = taScore; 
+                confetti({ particleCount: 30, spread: 40, origin: { y: 0.8 } });
+                setTimeout(() => { currentIndex++; loadNextAttackItem(); }, 400); 
+            } else {
+                playSound('wrong'); currentCombo = 0; updateComboUI();
+                btn.classList.add('shake', 'bg-gray-200', 'text-gray-400', 'border-gray-300'); btn.classList.remove('bg-white/90');
+                addToMistakes(taCurrentItem); 
+                taTimeLeft -= 3; if(taTimeLeft < 0) taTimeLeft = 0; 
+                const tt = document.getElementById('ta-time'); 
+                if(tt) {
+                    tt.innerText = taTimeLeft;
+                    const timeContainer = tt.parentElement; timeContainer.classList.add('shake'); setTimeout(() => timeContainer.classList.remove('shake'), 500);
+                }
+                setTimeout(() => { currentIndex++; loadNextAttackItem(); }, 600);
+            }
+        }
+        function endTimeAttack() { 
+            playSound('alarm'); 
+            const tfs = document.getElementById('ta-final-score'); if(tfs) tfs.innerText = taScore; 
+            const ol = document.getElementById('ta-overlay'); if(ol) ol.style.display = 'flex'; 
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } }); 
+        }
+
+        // --- Matching Board ---
+        function setupMatchingBoard() {
+            playSound('click'); const grid = document.getElementById('match-grid'); if(grid) grid.innerHTML = ''; 
+            const mo = document.getElementById('match-overlay'); if(mo) mo.style.display = 'none';
+            matchCards = []; firstSelection = null; matchedCount = 0; currentCombo = 0; updateComboUI();
+
+            const dataSource = shuffle(getFilteredData()); const pairsCount = Math.min(6, dataSource.length);
+            if(pairsCount === 0) { alert("沒有單字可以配對！"); return; }
+            let itemsToMatch = dataSource.slice(0, pairsCount);
+            itemsToMatch.forEach(item => { matchCards.push({ id: item.w, text: item.w, type: 'en' }); matchCards.push({ id: item.w, text: item.z, type: 'zh' }); });
+            matchCards = shuffle(matchCards);
+
+            if(grid) {
+                matchCards.forEach((card, index) => {
+                    const div = document.createElement('div'); div.className = "match-card pop-in font-black text-gray-700"; div.style.animationDelay = `${index * 0.05}s`;
+                    div.innerText = card.text; div.onclick = () => handleMatchClick(div, card); grid.appendChild(div);
+                });
+            }
+        }
+        function handleMatchClick(element, card) {
+            if(element.classList.contains('matched') || element.classList.contains('selected')) return;
+            playSound('select'); element.classList.add('selected');
+            if(!firstSelection) { firstSelection = { element, card }; } 
+            else {
+                const secondSelection = { element, card };
+                if(firstSelection.card.id === secondSelection.card.id && firstSelection.card.type !== secondSelection.card.type) {
+                    currentCombo++; updateComboUI();
+                    if(currentCombo >= 3) playSound('combo'); else playSound('match');
+                    
+                    firstSelection.element.classList.replace('selected', 'matched'); secondSelection.element.classList.replace('selected', 'matched');
+                    removeFromMistakes(getFullItemByWord(firstSelection.card.id)); 
+                    matchedCount++; addScoreAndSwitchTurn(1);
+                    if(matchedCount >= matchCards.length / 2) {
+                        setTimeout(() => {
+                            playSound('success'); confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                            setupMatchingBoard(); 
+                        }, 1000);
+                    }
+                } else {
+                    playSound('wrong'); switchTurnOnly(); currentCombo = 0; updateComboUI();
+                    addToMistakes(getFullItemByWord(firstSelection.card.id)); addToMistakes(getFullItemByWord(secondSelection.card.id)); 
+                    firstSelection.element.classList.add('shake'); secondSelection.element.classList.add('shake');
+                    const el1 = firstSelection.element; const el2 = secondSelection.element;
+                    setTimeout(() => { el1.classList.remove('selected', 'shake'); el2.classList.remove('selected', 'shake'); }, 500);
+                }
+                firstSelection = null;
+            }
+        }
+
+        function toggleCard() { const fc = document.getElementById('flashcard'); if(fc) { isFlipped = !isFlipped; fc.classList.toggle('flipped'); playSound('flip'); } }
+        function nextItem(withDelay = false) { if (withDelay) { setTimeout(() => { currentIndex++; loadCurrentItem(); }, 1500); } else { currentIndex++; loadCurrentItem(); } }
+        function handleSuccess() { 
+            const item = currentQueue[currentIndex]; if (item) removeFromMistakes(item); 
+            
+            currentCombo++; updateComboUI();
+            if(currentCombo >= 3) playSound('combo'); else playSound('success');
+            
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#FFD1DC', '#AEC6CF', '#77DD77', '#FDFD96', '#C3B1E1'] }); 
+            nextItem(true); 
+        }
+
+        function speak(text, rate = null) { 
+            if (synth.speaking) { synth.cancel(); } 
+            const utterance = new SpeechSynthesisUtterance(text); 
+            utterance.lang = 'en-US'; 
+            utterance.rate = rate || speechRate; 
+            utterance.pitch = 1.1; 
+            synth.speak(utterance); 
+        }
+        function speakWord() { const item = currentQueue[currentIndex]; if(!item) return; speak(item.w); }
+        function speakSentence() { const item = currentQueue[currentIndex]; if(!item) return; speak(item.e, speechRate + 0.05); }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
